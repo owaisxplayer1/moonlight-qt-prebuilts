@@ -31,15 +31,8 @@ endmacro()
 
 set(SDL2_FOUND TRUE)
 
-# Compute the installation prefix relative to this file.
-set(SDL2_FRAMEWORK_PATH "${CMAKE_CURRENT_LIST_DIR}")                                # > /SDL2.framework/Resources/CMake/
-get_filename_component(SDL2_FRAMEWORK_PATH "${SDL2_FRAMEWORK_PATH}" REALPATH)       # > /SDL2.framework/Versions/Current/Resources/CMake
-get_filename_component(SDL2_FRAMEWORK_PATH "${SDL2_FRAMEWORK_PATH}" REALPATH)       # > /SDL2.framework/Versions/A/Resources/CMake/
-get_filename_component(SDL2_FRAMEWORK_PATH "${SDL2_FRAMEWORK_PATH}" PATH)           # > /SDL2.framework/Versions/A/Resources/
-get_filename_component(SDL2_FRAMEWORK_PATH "${SDL2_FRAMEWORK_PATH}" PATH)           # > /SDL2.framework/Versions/A/
-get_filename_component(SDL2_FRAMEWORK_PATH "${SDL2_FRAMEWORK_PATH}" PATH)           # > /SDL2.framework/Versions/
-get_filename_component(SDL2_FRAMEWORK_PATH "${SDL2_FRAMEWORK_PATH}" PATH)           # > /SDL2.framework/
-get_filename_component(SDL2_FRAMEWORK_PARENT_PATH "${SDL2_FRAMEWORK_PATH}" PATH)    # > /
+string(REGEX REPLACE "SDL2\\.framework.*" "SDL2.framework" SDL2_FRAMEWORK_PATH "${CMAKE_CURRENT_LIST_DIR}")
+string(REGEX REPLACE "SDL2\\.framework.*" "" SDL2_FRAMEWORK_PARENT_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 # For compatibility with autotools sdl2-config.cmake, provide SDL2_* variables.
 
@@ -56,12 +49,12 @@ set(SDL2_LIBRARIES "SDL2::SDL2")
 # This is done for compatibility with CMake generated SDL2-target.cmake files.
 
 if(NOT TARGET SDL2::SDL2)
-    add_library(SDL2::SDL2 SHARED IMPORTED)
+    add_library(SDL2::SDL2 INTERFACE IMPORTED)
     set_target_properties(SDL2::SDL2
         PROPERTIES
-            FRAMEWORK "TRUE"
-            IMPORTED_LOCATION "${SDL2_FRAMEWORK_PATH}/Versions/A/SDL2"
+            INTERFACE_COMPILE_OPTIONS "SHELL:-F \"${SDL2_FRAMEWORK_PARENT_PATH}\""
             INTERFACE_INCLUDE_DIRECTORIES "${SDL2_INCLUDE_DIRS}"
+            INTERFACE_LINK_OPTIONS "SHELL:-F \"${SDL2_FRAMEWORK_PARENT_PATH}\";SHELL:-framework SDL2"
             COMPATIBLE_INTERFACE_BOOL "SDL2_SHARED"
             INTERFACE_SDL2_SHARED "ON"
             COMPATIBLE_INTERFACE_STRING "SDL_VERSION"
