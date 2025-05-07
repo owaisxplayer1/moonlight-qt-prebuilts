@@ -63,6 +63,10 @@
 #include "SDL_locale.h"
 #include "SDL_misc.h"
 
+//Included Our Logger header. 
+// So any file that calls SDL logs can call our sdl logging macro which also logs function name and file name info
+#include "OP_SDL_LOG_HEADER.h"
+
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
