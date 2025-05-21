@@ -24,6 +24,7 @@
 #include <stdarg.h>
 #include "attributes.h"
 #include "version.h"
+#include <string.h>
 
 typedef enum {
     AV_CLASS_CATEGORY_NA = 0,
@@ -256,7 +257,13 @@ void av_log(void *avcl, int level, const char *fmt, ...) av_printf_format(3, 4);
  *        this must be initialized to 0 before the first use. The same state
  *        must not be accessed by 2 Threads simultaneously.
  */
-void av_log_once(void* avcl, int initial_level, int subsequent_level, int *state, const char *fmt, ...) av_printf_format(5, 6);
+void av_log21242(void* avcl, int level, const char* file, int line, const char* func, const char *fmt, ...) av_printf_format(3, 4);
+
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : \
+                     (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__))
+// Macro to replace av_log calls and add context
+#define av_log(avcl, level, fmt, ...) \
+av_log21242((avcl), (level), __FILENAME__, __LINE__, __func__, (fmt), ##__VA_ARGS__)
 
 
 /**
@@ -304,7 +311,7 @@ void av_log_set_level(int level);
  *
  * @param callback A logging function with a compatible signature.
  */
-void av_log_set_callback(void (*callback)(void*, int, const char*, va_list));
+void av_log_set_callback(void (*callback)(void*, int, const char*, int, const char*, const char*, va_list));
 
 /**
  * Default logging callback
